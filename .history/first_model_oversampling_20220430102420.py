@@ -21,7 +21,7 @@ METRICS = [
 ]
 
 BATCH_SIZE = 32
-EPOCHS = 5
+EPOCHS = 50
 
 def main():
     df_single_raw = pd.read_csv("dataset_single.csv")

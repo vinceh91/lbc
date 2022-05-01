@@ -5,8 +5,9 @@ from feature_extractor import fingerprint_features
 import sklearn
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
-# import comet_ml
-# from comet_ml import Experiment
+import comet_ml
+
+from comet_ml import Experiment
 
 METRICS = [
       keras.metrics.TruePositives(name='tp'),
@@ -21,7 +22,7 @@ METRICS = [
 ]
 
 BATCH_SIZE = 32
-EPOCHS = 5
+EPOCHS = 50
 
 def main():
     df_single_raw = pd.read_csv("dataset_single.csv")
@@ -73,15 +74,14 @@ def train(train_dataset, val_dataset):
     model = build_model_graph(input_shape=(2048,))
 
     # Setting the API key (saved as environment variable)
-    # experiment = Experiment(
-    #     api_key="EBS82BdcQJedY2TKiM2v8QhLv",
-    #     project_name="lbc",
-    #     workspace="vinceh91",)
-    # experiment.log_dataset_hash(train_dataset)
+    experiment = Experiment(
+        api_key="EBS82BdcQJedY2TKiM2v8QhLv",
+        project_name="lbc",
+        workspace="vinceh91",)
+    experiment.log_dataset_hash(train_dataset)
 
 
     model.fit(train_dataset, validation_data=val_dataset, epochs=EPOCHS)
-    model.save("./models/first_model_oversamplig.h5")
 
     # score = model.evaluate(x_test, y_test, verbose=0)
 
