@@ -14,7 +14,6 @@ with open(Path(BASE_DIR, "requirements_test.txt")) as file:
 setup(
     name="servier",
     version="0.2",
-    # packages=["servier"],
     description="ML Test LBC",
     author="Vincent Haguet",
     classifiers=[
@@ -25,7 +24,7 @@ setup(
     install_requires=[required_packages],
     entry_points={
         "console_scripts": [
-            "train = main:train",
+            "train = servier.main:train",
             "predict = servier.main:predict",
             "evaluate = servier.main:evaluate",
         ],

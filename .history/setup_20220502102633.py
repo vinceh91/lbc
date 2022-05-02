@@ -25,7 +25,7 @@ setup(
     install_requires=[required_packages],
     entry_points={
         "console_scripts": [
-            "train = main:train",
+            "train = servier.main:train",
             "predict = servier.main:predict",
             "evaluate = servier.main:evaluate",
         ],
