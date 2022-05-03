@@ -97,7 +97,5 @@ def oversampling(features: np.ndarray, labels: np.ndarray):
 def get_features(arr):
     return np.array([fingerprint_features(s) for s in arr])
 
-
-
 if __name__ == '__main__':
     main()
