@@ -1,31 +1,25 @@
-FROM python:3.8.13-slim
+# For more information, please refer to https://aka.ms/vscode-docker-python
+FROM python:3.8-slim
 
-# 👇 Installation de dépendances sur le système
-RUN apt-get update \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+EXPOSE 5002
 
-# 👇 Packaging des sources python
-COPY requirements.txt setup.py /app/
-COPY servier/ /app/servier/
-# COPY config/ /app/config/
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
 
-# 👇 Packaging pour la web app streamlit
-# COPY webapp/ /app/webapp/
-# COPY .streamlit/ /app/.streamlit/
-# COPY .mapbox_token /app/
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
 
-# 👇 Packaging des données
-# COPY data/processed/stations /app/data/processed/stations
-# COPY data/processed/general_info_stations.parquet /app/data/processed/general_info_stations.parquet
+# Install pip requirements
+COPY requirements.txt .
+RUN python -m pip install -r requirements.txt
 
-# 👇 Génération et installation de dépendances Python via wheel
 WORKDIR /app
-RUN pip install --user -U pip && python setup.py bdist_wheel
-RUN pip install dist/servier-0.1-py3-none-any.whl
+COPY . /app
 
+# Creates a non-root user with an explicit UID and adds permission to access the /app folder
+# For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
+RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
+USER appuser
 
-
-# 👇 Exposition de l'application avec Streamlit via le port 8501
-# EXPOSE 8501
-# CMD streamlit run webapp/dashboard.py
+# During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
+CMD ["gunicorn", "--bind", "0.0.0.0:5002", "app:app"]

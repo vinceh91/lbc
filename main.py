@@ -71,15 +71,6 @@ def build_model_graph(metrics=METRICS, input_shape=None):
 def train(train_dataset, val_dataset):
     # Define model
     model = build_model_graph(input_shape=(2048,))
-
-    # Setting the API key (saved as environment variable)
-    # experiment = Experiment(
-    #     api_key="EBS82BdcQJedY2TKiM2v8QhLv",
-    #     project_name="lbc",
-    #     workspace="vinceh91",)
-    # experiment.log_dataset_hash(train_dataset)
-
-
     model.fit(train_dataset, validation_data=val_dataset, epochs=EPOCHS)
     model.save("./models/first_model_oversamplig.h5")
 
