@@ -1,5 +1,5 @@
 [console_scripts]
-evaluate = servier.main:evaluate
-predict = servier.main:predict
+evaluate = main:evaluate
+predict = main:predict
 train = main:train
 

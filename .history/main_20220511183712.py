@@ -48,15 +48,7 @@ def oversampling(features: np.ndarray, labels: np.ndarray):
 
     return resampled_features, resampled_labels
 
-def get_features(arr: np.ndarray) -> np.ndarray:
-    """_summary_
-
-    Args:
-        arr (np.ndarray): smiles
-
-    Returns:
-        np.ndarray:
-    """
+def get_features(arr):
     return np.array([fingerprint_features(s) for s in arr])
 
 df_single_raw = pd.read_csv("dataset_single.csv")

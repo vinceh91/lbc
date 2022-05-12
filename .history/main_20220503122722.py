@@ -22,15 +22,6 @@ BATCH_SIZE = 32
 EPOCHS = 5
 
 def oversampling(features: np.ndarray, labels: np.ndarray):
-    """oversample to account for the minority class
-
-    Args:
-        features (np.ndarray)
-        labels (np.ndarray)
-
-    Returns:
-        resampled_features, resampled_labels
-    """
     bool_labels = labels != 0
     
     pos_features = features[bool_labels]
@@ -48,15 +39,7 @@ def oversampling(features: np.ndarray, labels: np.ndarray):
 
     return resampled_features, resampled_labels
 
-def get_features(arr: np.ndarray) -> np.ndarray:
-    """_summary_
-
-    Args:
-        arr (np.ndarray): smiles
-
-    Returns:
-        np.ndarray:
-    """
+def get_features(arr):
     return np.array([fingerprint_features(s) for s in arr])
 
 df_single_raw = pd.read_csv("dataset_single.csv")

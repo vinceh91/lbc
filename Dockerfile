@@ -1,25 +1,27 @@
-# For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.8-slim
+FROM python:3.8.13-slim
 
-EXPOSE 5002
+# 👇 Installation de dépendances sur le système
+RUN apt-get update \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Keeps Python from generating .pyc files in the container
-ENV PYTHONDONTWRITEBYTECODE=1
-
-# Turns off buffering for easier container logging
-ENV PYTHONUNBUFFERED=1
-
-# Install pip requirements
-COPY requirements.txt .
-RUN python -m pip install -r requirements.txt
-
-WORKDIR /app
+# 👇 Packaging des sources python
+# COPY requirements_test.txt setup.py /app/
+# COPY models/ /app/servier/
+# COPY main.py /app/
+# COPY app.py /app/
 COPY . /app
 
-# Creates a non-root user with an explicit UID and adds permission to access the /app folder
-# For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
-RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
-USER appuser
+# 👇 Packaging des données
+# COPY data/processed/stations /app/data/processed/stations
+# COPY data/processed/general_info_stations.parquet /app/data/processed/general_info_stations.parquet
 
-# During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
+# 👇 Génération et installation de dépendances Python via wheel
+WORKDIR /app
+RUN pip install --user -U pip && python setup.py bdist_wheel
+RUN pip install dist/servier-0.2-py3-none-any.whl
+RUN pip install gunicorn flask
+
+# 👇 Exposition de l'application via le port 5002
+EXPOSE 5002
 CMD ["gunicorn", "--bind", "0.0.0.0:5002", "app:app"]

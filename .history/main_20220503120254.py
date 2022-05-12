@@ -6,6 +6,7 @@ import sklearn
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 
+
 METRICS = [
       keras.metrics.TruePositives(name='tp'),
       keras.metrics.FalsePositives(name='fp'),
@@ -20,44 +21,6 @@ METRICS = [
 
 BATCH_SIZE = 32
 EPOCHS = 5
-
-def oversampling(features: np.ndarray, labels: np.ndarray):
-    """oversample to account for the minority class
-
-    Args:
-        features (np.ndarray)
-        labels (np.ndarray)
-
-    Returns:
-        resampled_features, resampled_labels
-    """
-    bool_labels = labels != 0
-    
-    pos_features = features[bool_labels]
-    neg_features = features[~bool_labels]
-    pos_labels = labels[bool_labels]
-    neg_labels = labels[~bool_labels]
-
-    ids = np.arange(len(neg_features))
-    choices = np.random.choice(ids, len(pos_features))
-    res_neg_features = neg_features[choices]
-    res_neg_labels = neg_labels[choices]
-
-    resampled_features = np.concatenate([res_neg_features, pos_features], axis=0)
-    resampled_labels = np.concatenate([res_neg_labels, pos_labels], axis=0)
-
-    return resampled_features, resampled_labels
-
-def get_features(arr: np.ndarray) -> np.ndarray:
-    """_summary_
-
-    Args:
-        arr (np.ndarray): smiles
-
-    Returns:
-        np.ndarray:
-    """
-    return np.array([fingerprint_features(s) for s in arr])
 
 df_single_raw = pd.read_csv("dataset_single.csv")
 train_df, test_df = train_test_split(df_single_raw, test_size=0.1)
@@ -83,7 +46,6 @@ tf_test_dataset = tf.data.Dataset.from_tensor_slices((extracted_test_features, t
 
 tf_train_dataset = tf_train_dataset.shuffle(5000).batch(BATCH_SIZE).prefetch(1)
 tf_val_dataset = tf_val_dataset.batch(BATCH_SIZE).prefetch(1)
-tf_test_dataset = tf_test_dataset.batch(BATCH_SIZE).prefetch(1)
 
 def build_model_graph(metrics=METRICS, input_shape=None):
     model = keras.Sequential([
@@ -97,30 +59,38 @@ def build_model_graph(metrics=METRICS, input_shape=None):
       optimizer=keras.optimizers.Adam(learning_rate=1e-3),
       loss=keras.losses.BinaryCrossentropy(),
       metrics=metrics)
+
     return model
 
-def train(train_dataset=tf_train_dataset, val_dataset=tf_val_dataset, model_path="./models/first_model_oversamplig.h5"):
+def train(train_dataset=tf_train_dataset, val_dataset=tf_val_dataset):
+
     # Define model
     model = build_model_graph(input_shape=(2048,))
     model.fit(train_dataset, validation_data=val_dataset, epochs=EPOCHS)
-    model.save(model_path)
+    model.save("./models/first_model_oversamplig.h5")
 
     # score = model.evaluate(x_test, y_test, verbose=0)
 
-def evaluate(model_path="./models/first_model_oversamplig.h5", test_dataset=tf_test_dataset):
-    model_loaded = keras.models.load_model(model_path)
-    model_loaded.evaluate(test_dataset)
+def oversampling(features: np.ndarray, labels: np.ndarray):
+    bool_labels = labels != 0
+    
+    pos_features = features[bool_labels]
+    neg_features = features[~bool_labels]
+    pos_labels = labels[bool_labels]
+    neg_labels = labels[~bool_labels]
 
-def predict(smile="Cc1cccc(N2CCN(C(=O)C34CC5CC(CC(C5)C3)C4)CC2)c1C", model_path="./models/first_model_oversamplig.h5"):
-    model_loaded = keras.models.load_model(model_path)
-    input = np.array(fingerprint_features(smile))[np.newaxis, :]
-    pred = model_loaded.predict(input)
-    print(1 if pred[0][0] > 0.5 else 0)
+    ids = np.arange(len(neg_features))
+    choices = np.random.choice(ids, len(pos_features))
+    res_neg_features = neg_features[choices]
+    res_neg_labels = neg_labels[choices]
 
-def main():
-    train()
-    evaluate()
-    predict()
+    resampled_features = np.concatenate([res_neg_features, pos_features], axis=0)
+    resampled_labels = np.concatenate([res_neg_labels, pos_labels], axis=0)
+
+    return resampled_features, resampled_labels
+
+def get_features(arr):
+    return np.array([fingerprint_features(s) for s in arr])
 
 if __name__ == '__main__':
     main()
